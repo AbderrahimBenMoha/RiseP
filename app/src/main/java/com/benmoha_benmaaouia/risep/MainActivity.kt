@@ -4,6 +4,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.Composable
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.benmoha_benmaaouia.risep.ui.theme.RisePTheme
 
 class MainActivity : ComponentActivity() {
@@ -12,12 +16,38 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             RisePTheme {
-                LoginScreen(
-                    onLoginSuccess = {
-                        // Action de connexion à implémenter plus tard
-                    }
-                )
+                RisePApp()
             }
+        }
+    }
+}
+
+@Composable
+fun RisePApp() {
+    val navController = rememberNavController()
+
+    // C'est ici que la magie opère : startDestination DOIT être "login"
+    NavHost(navController = navController, startDestination = "login") {
+        
+        // 1. La route de l'écran de connexion
+        composable("login") {
+            LoginScreen(
+                onLoginSuccess = {
+                    navController.navigate("dashboard") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                }
+            )
+        }
+        
+        // 2. La route de la liste des plantes (ton Dashboard)
+        composable("dashboard") {
+            PlantListScreen(
+                onNavigateToDetails = { plantId ->
+                    // Plus tard, on naviguera vers la page spécifique de la plante avec son ID
+                    // navController.navigate("plant_detail/$plantId")
+                }
+            )
         }
     }
 }
