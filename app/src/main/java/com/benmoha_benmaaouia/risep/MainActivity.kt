@@ -45,8 +45,19 @@ fun RisePApp() {
             PlantListScreen(
                 onNavigateToDetails = { plantId ->
                     // Plus tard, on naviguera vers la page spécifique de la plante avec son ID
-                    // navController.navigate("plant_detail/$plantId")
+                    navController.navigate("plant_detail/$plantId")
                 }
+            )
+        }
+        
+        // 3. La route de détail de la plante
+        composable("plant_detail/{plantId}") { backStackEntry ->
+            // On extrait l'ID de la plante depuis l'URL de navigation
+            val plantId = backStackEntry.arguments?.getString("plantId") ?: return@composable
+            
+            PlantDetailScreen(
+                plantId = plantId,
+                onNavigateBack = { navController.popBackStack() } // Action pour le bouton "<"
             )
         }
     }
