@@ -60,5 +60,10 @@ fun RisePApp() {
                 onNavigateBack = { navController.popBackStack() } // Action pour le bouton "<"
             )
         }
+        
+        // 4. La route de l'historique
+        composable("history") {
+            HistoryScreen()
+        }
     }
 }
