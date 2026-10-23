@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -18,12 +19,15 @@ import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PlantDetailScreen(plantId: String, onNavigateBack: () -> Unit) {
-    // Récupération de la plante depuis nos fausses données
-    val plant = mockPlants.find { it.id == plantId } ?: return
+fun PlantDetailScreen(plantId: String, onNavigateBack: () -> Unit, viewModel: PlantViewModel = viewModel()) {
+    // On "observe" les flux de données du ViewModel
+    val plantData by viewModel.plantData.collectAsState()
+    val isPumpActive by viewModel.isPumpActive.collectAsState()
+    
     var autoWatering by remember { mutableStateOf(true) }
 
-    val isCritical = plant.isCritical
+    // Règle métier : critique si humidité < 25 (valeur arbitraire pour l'exemple)
+    val isCritical = plantData.soilMoisture < 25 
     val mainColor = if (isCritical) Color(0xFFFF5252) else Color(0xFF4CAF50)
 
     Column(
@@ -48,7 +52,7 @@ fun PlantDetailScreen(plantId: String, onNavigateBack: () -> Unit) {
                 Icon(Icons.Default.ArrowBack, contentDescription = "Retour")
             }
             Text(
-                text = plant.name,
+                text = plant?.name ?: "Ma Plante",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF2E7D32)
@@ -66,7 +70,9 @@ fun PlantDetailScreen(plantId: String, onNavigateBack: () -> Unit) {
         // 2. Jauge circulaire d'humidité
         Box(contentAlignment = Alignment.Center) {
             CircularProgressIndicator(
-                progress = { (plant.moisture ?: 0) / 100f },
+                // Attention: le capteur analogique peut renvoyer des valeurs > 100. 
+                // Il faudra peut-être une conversion selon la calibration du capteur.
+                progress = { (plantData.soilMoisture / 1000f).coerceIn(0f, 1f) }, // Exemple de normalisation (0-1000)
                 modifier = Modifier.size(160.dp),
                 color = mainColor,
                 strokeWidth = 14.dp,
@@ -75,7 +81,7 @@ fun PlantDetailScreen(plantId: String, onNavigateBack: () -> Unit) {
             )
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = "${plant.moisture}%",
+                    text = "${plantData.soilMoisture}", 
                     fontSize = 40.sp,
                     fontWeight = FontWeight.Bold,
                     color = mainColor
@@ -107,27 +113,32 @@ fun PlantDetailScreen(plantId: String, onNavigateBack: () -> Unit) {
 
         // 3. Grille de statistiques (2x2)
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            StatCard(modifier = Modifier.weight(1f), title = "Température", value = "${plant.temperature} °C", icon = "🌡")
-            StatCard(modifier = Modifier.weight(1f), title = "Humidité air", value = "48 %", icon = "💧") // Valeur fixe pour l'exemple
+            StatCard(modifier = Modifier.weight(1f), title = "Température", value = "${plantData.temperature} °C", icon = "🌡")
+            StatCard(modifier = Modifier.weight(1f), title = "Humidité air", value = "${plantData.airHumidity} %", icon = "💧")
         }
         Spacer(modifier = Modifier.height(12.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            StatCard(modifier = Modifier.weight(1f), title = "Luminosité", value = "${plant.light} lx", icon = "☀️")
-            StatCard(modifier = Modifier.weight(1f), title = "Statut LED", value = if (isCritical) "Rouge" else "Vert", icon = "💡", valueColor = mainColor)
+            StatCard(modifier = Modifier.weight(1f), title = "Luminosité", value = "${plantData.lightLevel} lx", icon = "☀️")
+            StatCard(modifier = Modifier.weight(1f), title = "Niveau Eau", value = if(plantData.waterLevelOk) "OK" else "Vide", icon = "💧", valueColor = if(plantData.waterLevelOk) Color.Black else Color.Red)
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
         // 4. Bouton Arroser
         Button(
-            onClick = { /* Action arrosage manuel via Firebase plus tard */ },
+            onClick = { viewModel.triggerManualWatering() },
+            enabled = !isPumpActive && plantData.waterLevelOk, // Désactivé si déjà en cours ou réservoir vide
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2196F3)),
             shape = RoundedCornerShape(16.dp)
         ) {
-            Text("💧 💦 Arroser maintenant (50ml)", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(
+                if (isPumpActive) "Arrosage en cours..." else "💧 💦 Arroser maintenant (50ml)", 
+                fontSize = 16.sp, 
+                fontWeight = FontWeight.Bold
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
