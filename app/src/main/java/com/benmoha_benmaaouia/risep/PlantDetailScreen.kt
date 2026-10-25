@@ -26,8 +26,7 @@ fun PlantDetailScreen(plantId: String, onNavigateBack: () -> Unit, viewModel: Pl
     // On "observe" les flux de données du ViewModel
     val plantData by viewModel.plantData.collectAsState()
     val isPumpActive by viewModel.isPumpActive.collectAsState()
-    
-    var autoWatering by remember { mutableStateOf(true) }
+    val autoWatering by viewModel.autoWatering.collectAsState()
 
     // Règle métier : critique si humidité < 25 (valeur arbitraire pour l'exemple)
     val isCritical = plantData.soilMoisture < 25 
@@ -165,7 +164,7 @@ fun PlantDetailScreen(plantId: String, onNavigateBack: () -> Unit, viewModel: Pl
                     }
                     Switch(
                         checked = autoWatering,
-                        onCheckedChange = { autoWatering = it },
+                        onCheckedChange = { viewModel.setAutoWatering(it) },
                         colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Color(0xFF388E3C))
                     )
                 }
