@@ -10,6 +10,9 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,7 +23,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun HistoryScreen() {
+fun HistoryScreen(viewModel: PlantViewModel = viewModel()) {
+    val historyEvents by viewModel.historyEvents.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -89,27 +94,26 @@ fun HistoryScreen() {
         Spacer(modifier = Modifier.height(16.dp))
 
         // Liste des actions
-        TimelineItem(
-            icon = Icons.Default.WaterDrop,
-            iconColor = Color(0xFF2196F3),
-            bgColor = Color(0xFFE3F2FD),
-            title = "Arrosage automatique (50ml)",
-            time = "Aujourd'hui, 07:15"
-        )
-        TimelineItem(
-            icon = Icons.Default.Warning,
-            iconColor = Color(0xFFF44336),
-            bgColor = Color(0xFFFFEBEE),
-            title = "Seuil critique atteint (18%)",
-            time = "Aujourd'hui, 07:14"
-        )
-        TimelineItem(
-            icon = Icons.Default.Person,
-            iconColor = Color(0xFF9E9E9E),
-            bgColor = Color(0xFFF5F5F5),
-            title = "Arrosage manuel (Ahdi)",
-            time = "Hier, 18:30"
-        )
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(bottom = 80.dp)
+        ) {
+            items(historyEvents) { event ->
+                val iconData = when (event.type) {
+                    "WATERING" -> Triple(Icons.Default.WaterDrop, Color(0xFF2196F3), Color(0xFFE3F2FD))
+                    "ALERT" -> Triple(Icons.Default.Warning, Color(0xFFF44336), Color(0xFFFFEBEE))
+                    else -> Triple(Icons.Default.Person, Color(0xFF9E9E9E), Color(0xFFF5F5F5))
+                }
+
+                TimelineItem(
+                    icon = iconData.first,
+                    iconColor = iconData.second,
+                    bgColor = iconData.third,
+                    title = event.message,
+                    time = event.timestamp // On affiche tel quel pour commencer
+                )
+            }
+        }
     }
 }
 

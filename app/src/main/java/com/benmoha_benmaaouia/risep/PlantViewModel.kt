@@ -18,11 +18,18 @@ data class FirebasePlantData(
     val waterLevelOk: Boolean = true
 )
 
+data class HistoryEvent(
+    val type: String = "",
+    val message: String = "",
+    val timestamp: String = ""
+)
+
 class PlantViewModel : ViewModel() {
     private val database = FirebaseDatabase.getInstance()
     private val deviceRef = database.getReference("devices/esp32_plant_01")
     private val telemetryRef = deviceRef.child("telemetry")
     private val commandsRef = deviceRef.child("commands")
+    private val historyRef = deviceRef.child("historique")
 
     // État observé par l'UI
     private val _plantData = MutableStateFlow(FirebasePlantData())
@@ -31,9 +38,13 @@ class PlantViewModel : ViewModel() {
     private val _isPumpActive = MutableStateFlow(false)
     val isPumpActive: StateFlow<Boolean> = _isPumpActive.asStateFlow()
 
+    private val _historyEvents = MutableStateFlow<List<HistoryEvent>>(emptyList())
+    val historyEvents: StateFlow<List<HistoryEvent>> = _historyEvents.asStateFlow()
+
     init {
         startListeningToTelemetry()
         startListeningToCommands()
+        startListeningToHistory()
     }
 
     private fun startListeningToTelemetry() {
@@ -66,5 +77,24 @@ class PlantViewModel : ViewModel() {
     // Fonction appelée par le bouton "Arroser" de l'UI
     fun triggerManualWatering() {
         commandsRef.child("pumpActive").setValue(true)
+    }
+
+    private fun startListeningToHistory() {
+        historyRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val eventsList = mutableListOf<HistoryEvent>()
+                for (childSnapshot in snapshot.children) {
+                    val event = childSnapshot.getValue(HistoryEvent::class.java)
+                    if (event != null) {
+                        eventsList.add(event)
+                    }
+                }
+                // On trie par date décroissante (le plus récent en haut)
+                _historyEvents.value = eventsList.sortedByDescending { it.timestamp }
+            }
+            override fun onCancelled(error: DatabaseError) {
+                // Gestion erreur
+            }
+        })
     }
 }
