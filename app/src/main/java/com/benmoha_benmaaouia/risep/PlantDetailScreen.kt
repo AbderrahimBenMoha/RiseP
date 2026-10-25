@@ -20,6 +20,9 @@ import androidx.compose.ui.unit.sp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlantDetailScreen(plantId: String, onNavigateBack: () -> Unit, viewModel: PlantViewModel = viewModel()) {
+    // Récupération du nom depuis mockPlants pour l'instant
+    val plantName = mockPlants.find { it.id == plantId }?.name ?: "Ma Plante"
+    
     // On "observe" les flux de données du ViewModel
     val plantData by viewModel.plantData.collectAsState()
     val isPumpActive by viewModel.isPumpActive.collectAsState()
@@ -52,7 +55,7 @@ fun PlantDetailScreen(plantId: String, onNavigateBack: () -> Unit, viewModel: Pl
                 Icon(Icons.Default.ArrowBack, contentDescription = "Retour")
             }
             Text(
-                text = plant?.name ?: "Ma Plante",
+                text = plantName,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF2E7D32)
