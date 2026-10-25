@@ -63,18 +63,20 @@ fun PlantListScreen(onNavigateToDetails: (String) -> Unit, viewModel: PlantViewM
         ) {
             // On affiche l'ESP32 connecté à Firebase
             item {
-                PlantCardLive(plantData = plantData, plantId = "esp32_plant_01", plantName = "Monstera Bureau", onNavigateToDetails = onNavigateToDetails)
-            }
-            // Et on peut garder les autres fausses plantes pour montrer la liste
-            items(mockPlants.filter { it.id != "esp_002" }) { plant ->
-                PlantCard(plant = plant, onNavigateToDetails = onNavigateToDetails)
+                PlantCardLive(
+                    plantData = plantData, 
+                    plantId = "esp32_plant_01", 
+                    plantName = "Monstera Bureau", 
+                    onNavigateToDetails = onNavigateToDetails,
+                    onWaterPlant = { viewModel.triggerManualWatering() } // On connecte le bouton arroser
+                )
             }
         }
     }
 }
 
 @Composable
-fun PlantCardLive(plantData: FirebasePlantData, plantId: String, plantName: String, onNavigateToDetails: (String) -> Unit) {
+fun PlantCardLive(plantData: FirebasePlantData, plantId: String, plantName: String, onNavigateToDetails: (String) -> Unit, onWaterPlant: () -> Unit) {
     val isCritical = plantData.soilMoisture < 25
     val statusColor = if (isCritical) Color(0xFFE53935) else Color(0xFF4CAF50)
 
@@ -145,7 +147,7 @@ fun PlantCardLive(plantData: FirebasePlantData, plantId: String, plantName: Stri
                     }
                     
                     Button(
-                        onClick = { /* Action arrosage manuel */ },
+                        onClick = onWaterPlant, // Connecté à Firebase via le ViewModel
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE3F2FD)),
                         shape = RoundedCornerShape(12.dp),
