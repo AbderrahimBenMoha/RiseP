@@ -13,12 +13,16 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(onLoginSuccess: () -> Unit) {
     var email by remember { mutableStateOf("ahdi.ben-maaouia@polytech.fr") }
     var password by remember { mutableStateOf("...............") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
+    val auth = FirebaseAuth.getInstance()
 
     // Couleurs basées sur ta maquette
     val darkGreenBg = Color(0xFF1E2E22)
@@ -112,14 +116,48 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
 
             // Bouton de connexion
             Button(
-                onClick = { onLoginSuccess() },
+                onClick = {
+                    if (email.isNotBlank() && password.isNotBlank()) {
+                        isLoading = true
+                        errorMessage = null
+                        
+                        // Appel réseau à Firebase
+                        auth.signInWithEmailAndPassword(email, password)
+                            .addOnCompleteListener { task ->
+                                isLoading = false
+                                if (task.isSuccessful) {
+                                    onLoginSuccess() // Succès : on passe au Dashboard
+                                } else {
+                                    // Échec : on affiche l'erreur
+                                    errorMessage = task.exception?.localizedMessage ?: "Erreur de connexion"
+                                }
+                            }
+                    } else {
+                        errorMessage = "Veuillez remplir tous les champs"
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = buttonGreen),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                enabled = !isLoading // Désactive le bouton pendant le chargement
             ) {
-                Text("SE CONNECTER", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    text = if (isLoading) "CONNEXION..." else "SE CONNECTER", 
+                    fontSize = 16.sp, 
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            // Affichage du message d'erreur juste sous le bouton
+            if (errorMessage != null) {
+                Text(
+                    text = errorMessage!!,
+                    color = Color.Red,
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
             }
 
             Spacer(modifier = Modifier.weight(1f))
