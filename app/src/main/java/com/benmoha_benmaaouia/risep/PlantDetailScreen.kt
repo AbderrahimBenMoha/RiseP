@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,13 +19,11 @@ import androidx.compose.ui.unit.sp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlantDetailScreen(plantId: String, onNavigateBack: () -> Unit, viewModel: PlantViewModel = viewModel()) {
-    // Récupération du nom depuis mockPlants pour l'instant
-    val plantName = mockPlants.find { it.id == plantId }?.name ?: "Ma Plante"
-    
     // On "observe" les flux de données du ViewModel
     val plantData by viewModel.plantData.collectAsState()
     val isPumpActive by viewModel.isPumpActive.collectAsState()
     val autoWatering by viewModel.autoWatering.collectAsState()
+    val historyEvents by viewModel.historyEvents.collectAsState()
 
     // Règle métier : critique si humidité < 25 (valeur arbitraire pour l'exemple)
     val isCritical = plantData.soilMoisture < 25 
@@ -41,7 +38,7 @@ fun PlantDetailScreen(plantId: String, onNavigateBack: () -> Unit, viewModel: Pl
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
-        // 1. En-tête (Retour, Titre, Réglages)
+        // 1. En-tête (Retour, Titre)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -54,17 +51,13 @@ fun PlantDetailScreen(plantId: String, onNavigateBack: () -> Unit, viewModel: Pl
                 Icon(Icons.Default.ArrowBack, contentDescription = "Retour")
             }
             Text(
-                text = plantName,
+                text = "Monstera Bureau", // Nom fixe puisque qu'il n'y a qu'une plante
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF2E7D32)
             )
-            IconButton(
-                onClick = { /* Action Réglages */ },
-                modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
-            ) {
-                Icon(Icons.Default.Settings, contentDescription = "Réglages")
-            }
+            // Bouton réglages supprimé
+            Spacer(modifier = Modifier.size(48.dp)) // Pour garder le texte centré
         }
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -168,8 +161,17 @@ fun PlantDetailScreen(plantId: String, onNavigateBack: () -> Unit, viewModel: Pl
                         colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Color(0xFF388E3C))
                     )
                 }
+                
+                // Recherche du dernier événement d'arrosage
+                val lastWateringEvent = historyEvents.find { it.message.contains("Arrosage", ignoreCase = true) }
+                val lastWateringText = if (lastWateringEvent != null) {
+                    "🕒 Dernier arrosage : ${com.benmoha_benmaaouia.risep.formatTime(lastWateringEvent.timestamp, "dd/MM à HH:mm")}"
+                } else {
+                    "🕒 Aucun arrosage récent"
+                }
+
                 HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color(0xFFF0F0F0))
-                Text("🕒 Dernier arrosage : Aujourd'hui à 07:15", color = Color.Gray, fontSize = 12.sp)
+                Text(lastWateringText, color = Color.Gray, fontSize = 12.sp)
             }
         }
     }

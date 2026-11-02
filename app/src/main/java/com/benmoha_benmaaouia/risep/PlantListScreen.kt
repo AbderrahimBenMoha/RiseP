@@ -29,7 +29,7 @@ fun PlantListScreen(onNavigateToDetails: (String) -> Unit, viewModel: PlantViewM
     ) {
         Spacer(modifier = Modifier.height(48.dp))
         
-        // En-tête : Titre + Bouton Ajout
+        // En-tête : Titre seul
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -41,17 +41,6 @@ fun PlantListScreen(onNavigateToDetails: (String) -> Unit, viewModel: PlantViewM
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF333333)
             )
-            
-            // Bouton +
-            FloatingActionButton(
-                onClick = { /* Action pour ajouter une plante plus tard */ },
-                containerColor = Color(0xFF388E3C),
-                contentColor = Color.White,
-                shape = CircleShape,
-                modifier = Modifier.size(48.dp)
-            ) {
-                Text("+", fontSize = 24.sp)
-            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
