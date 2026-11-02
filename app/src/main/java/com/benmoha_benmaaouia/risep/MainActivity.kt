@@ -89,13 +89,17 @@ fun RisePApp() {
                         )
                     )
 
-                    // Onglet 3 : Réglages (Écran vide pour l'instant)
+                    // Onglet 3 : Réglages
                     NavigationBarItem(
                         icon = { Icon(Icons.Default.Settings, contentDescription = "Réglages") },
                         label = { Text("Réglages") },
                         selected = currentRoute == "settings",
                         onClick = {
-                            // On naviguera vers un écran Settings plus tard
+                            navController.navigate("settings") {
+                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
                         },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = Color(0xFF388E3C),
@@ -142,6 +146,17 @@ fun RisePApp() {
             
             composable("history") {
                 HistoryScreen()
+            }
+            
+            // 5. La route des réglages
+            composable("settings") {
+                SettingsScreen(
+                    onLogout = {
+                        navController.navigate("login") {
+                            popUpTo(0) { inclusive = true } // On vide tout l'historique de navigation
+                        }
+                    }
+                )
             }
         }
     }
