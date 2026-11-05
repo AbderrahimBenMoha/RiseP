@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
@@ -100,17 +99,6 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                     singleLine = true
                 )
             }
-            
-            // Mot de passe oublié
-            Text(
-                "Mot de passe oublié ?",
-                color = Color(0xFF64B5F6),
-                fontSize = 12.sp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
-                textAlign = TextAlign.End
-            )
 
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -161,12 +149,6 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
             }
 
             Spacer(modifier = Modifier.weight(1f))
-
-            // Lien Inscription
-            Row(modifier = Modifier.padding(bottom = 32.dp)) {
-                Text("Pas encore de compte ? ", color = textColor.copy(alpha = 0.8f), fontSize = 14.sp)
-                Text("S'inscrire", color = textColor, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-            }
         }
     }
 }

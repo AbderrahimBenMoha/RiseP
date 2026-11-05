@@ -130,16 +130,14 @@ fun RisePApp() {
             
             composable("dashboard") {
                 PlantListScreen(
-                    onNavigateToDetails = { plantId ->
-                        navController.navigate("plant_detail/$plantId")
+                    onNavigateToDetails = { 
+                        navController.navigate("plant_detail")
                     }
                 )
             }
             
-            composable("plant_detail/{plantId}") { backStackEntry ->
-                val plantId = backStackEntry.arguments?.getString("plantId") ?: return@composable
+            composable("plant_detail") {
                 PlantDetailScreen(
-                    plantId = plantId,
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

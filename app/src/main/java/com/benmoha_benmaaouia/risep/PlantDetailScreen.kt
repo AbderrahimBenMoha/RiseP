@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PlantDetailScreen(plantId: String, onNavigateBack: () -> Unit, viewModel: PlantViewModel = viewModel()) {
+fun PlantDetailScreen(onNavigateBack: () -> Unit, viewModel: PlantViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
     // On "observe" les flux de données du ViewModel
     val plantData by viewModel.plantData.collectAsState()
     val isPumpActive by viewModel.isPumpActive.collectAsState()
@@ -51,12 +51,11 @@ fun PlantDetailScreen(plantId: String, onNavigateBack: () -> Unit, viewModel: Pl
                 Icon(Icons.Default.ArrowBack, contentDescription = "Retour")
             }
             Text(
-                text = "Monstera Bureau", // Nom fixe puisque qu'il n'y a qu'une plante
+                text = "Monstera Bureau",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF2E7D32)
             )
-            // Bouton réglages supprimé
             Spacer(modifier = Modifier.size(48.dp)) // Pour garder le texte centré
         }
 
