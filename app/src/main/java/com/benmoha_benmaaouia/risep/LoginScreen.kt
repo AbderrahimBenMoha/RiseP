@@ -1,6 +1,9 @@
 package com.benmoha_benmaaouia.risep
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -24,14 +27,18 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
     val auth = FirebaseAuth.getInstance()
 
     // Couleurs basées sur ta maquette
-    val darkGreenBg = Color(0xFF1E2E22)
     val buttonGreen = Color(0xFF388E3C)
     val textColor = Color.White
     val fieldBg = Color(0xFFF2F2F2)
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Fond (À remplacer par R.drawable.ton_image_de_fond)
-        Box(modifier = Modifier.fillMaxSize().background(darkGreenBg))
+        // Fond avec l'image Monstera
+        Image(
+            painter = painterResource(id = R.drawable.login_background),
+            contentDescription = "Fond d'écran Monstera",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop // Pour que l'image remplisse bien tout l'écran
+        )
         
         Column(
             modifier = Modifier
